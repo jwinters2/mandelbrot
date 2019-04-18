@@ -1,14 +1,18 @@
 #!/bin/bash
 
+# check if the file we're saving it to exists, and only proceed if it's empty
 if [[ -d "frames" ]]; then
   if [[ $(ls -1 frames | wc -l) -gt "0" ]]; then
     echo "error: frames directory is not empty";
     exit
   fi
 else
+  # if it doesn't exist we can just make it
   mkdir frames
 fi
 
+# in case it fails or the user cancells the program, don't overwrite the
+# last good video file
 if [[ -f "mandelbrot.mp4" ]]; then
   mv mandelbrot.mp4 mandelbrot.mp4.TEMP
 fi
@@ -19,21 +23,29 @@ if [[ $(stat -c %Y main.cpp) -ge $(stat -c %Y ma) ]]; then
   ./compile
 fi
 
+# generate the frames
 echo "generating bmp images" && \
-./ma 1920 1080 "frames/frame" --start-frame 0 --num-frames 1000 --anti-alias 5 && \
+./ma 1920 1080 "frames/frame" \
+--start-frame 0 \
+--num-frames 1000 \
+--anti-alias 5 && \
 
+# .bmp doesn't work with ffmpeg very well, so convert them with imagemagick
 echo "converting to jpg" && \
 mogrify -format jpg frames/* && \
 
+# delete the original .bmp images
 echo "deleting original bmp images" && \
 rm frames/frame*.bmp && \
 
+# convert them into a video
 echo "compiling into mp4"
 ffmpeg -framerate 30 -i frames/frame%04d.jpg mandelbrot.mp4 && \
 
 #echo "deleting images" && \
 #rm -r frames && \
 
+# the video was successfully made, so delete the temp file
 if [[ -f "mandelbrot.mp4.TEMP" ]]; then
   rm mandelbrot.mp4.TEMP
 fi

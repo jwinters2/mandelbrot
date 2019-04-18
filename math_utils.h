@@ -1,3 +1,8 @@
+/*
+ * for miscellaneous math functions that don't fit in any other file,
+ * but I wanted to de-clutter main.cpp, so they're in here now
+ */
+
 #ifndef __MATH_UTILS_H_
 #define __MATH_UTILS_H_
 
